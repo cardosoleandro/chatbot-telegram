@@ -1,0 +1,386 @@
+{
+  "name": "Bot Tempo - Telegram OpenWeather",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        -32
+      ],
+      "id": "5eeef4ff-4469-43e1-bad6-2d4781dff91c",
+      "name": "Telegram Trigger",
+      "webhookId": "fd1f3468-c9c3-4a3a-89d7-2af116196d94",
+      "credentials": {
+        "telegramApi": {
+          "id": "l45b4OI57xq9YdPz",
+          "name": "OroroMunroe - FTR"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d88c523b-af70-4fa2-8640-dfa46cbf826b",
+              "name": "queue",
+              "value": "={{\n  (() => {\n    const raw = ($json.message.text || \"\").trim().toLowerCase();\n\n    const parts = raw.split(\",\").map(p => p.trim());\n\n    const city = parts[0] || \"\";\n    const state = (parts[1] || \"\").toLowerCase();\n\n    return `${city},${state}`;\n  })()\n}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        -32
+      ],
+      "id": "5d9cd02e-d944-432d-a5b9-fc0d01bff9bb",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e76f1a04-25f2-4772-8673-5403ecbad56f",
+              "name": "temperature",
+              "value": "={{ $json.main.temp.round() }}",
+              "type": "number"
+            },
+            {
+              "id": "dd901a04-df3a-4130-8390-7dd97170aca5",
+              "name": "cityName",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "933cdfc5-e032-4c36-8569-ed7f5efedb9d",
+              "name": "country",
+              "value": "={{ $json.sys.country }}",
+              "type": "string"
+            },
+            {
+              "id": "93ef0c2a-dc8b-44b1-9e07-c73113bd1762",
+              "name": "weather",
+              "value": "={{ $json.weather[0].description }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        736,
+        -224
+      ],
+      "id": "aca815f2-307a-4eb0-800f-ec0555e715cb",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.content.parts[0].text }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1376,
+        -320
+      ],
+      "id": "1c958df2-015f-4e6f-8ee0-fa277328a8ec",
+      "name": "Send a text message",
+      "webhookId": "d2eb96b8-2630-4fef-bcd7-6ebe0ad7fde8",
+      "credentials": {
+        "telegramApi": {
+          "id": "l45b4OI57xq9YdPz",
+          "name": "OroroMunroe - FTR"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.content.parts[0].text }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1088,
+        -32
+      ],
+      "id": "09f36de4-0b08-4137-8224-d4bbdc3475fc",
+      "name": "Send a text message1",
+      "webhookId": "d2eb96b8-2630-4fef-bcd7-6ebe0ad7fde8",
+      "credentials": {
+        "telegramApi": {
+          "id": "l45b4OI57xq9YdPz",
+          "name": "OroroMunroe - FTR"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.0-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.0-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json.error }}.\nInformações inseridas pelo usuário:\n{{ $('Telegram Trigger').item.json.message.text }}"
+            }
+          ]
+        },
+        "options": {
+          "systemMessage": "=Sua função é informar o usuário em caso de erro com mensagem de reescrita natural, curta e direta, tom amigável como em uma conversa humana no whatsapp, respondendo no idioma pt_BR e garantindo desambiguação. **VOCÊ NÃO PRECISA DIZER TECNICAMENTE QUAL ERRO ACONTECEU** Você receberá informações da solicitação do usuário, geralmente será solicitando clima e tempo em uma cidade específica. Para que as solicitações funcionem, o usuário precisa informar EXATAMENTE cidade e país como nos exemplos abaixo:\n- Ipatinga, BR\n- São Paulo, BR\n- New York, US\n\nCaso ele tenha inserido informações diferentes disso, retorne informando como ele deve proceder e citando um exemplo.\n\n**SEJA PRECISO E DIRETO, DÊ O RETORNO EM UMA ÚNICA FRASE**\nExemplo: ❌ Cidade não encontrada. Use o formato Cidade, país (ex.: Belo Horizont, BR)."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        672,
+        64
+      ],
+      "id": "fbeece51-4c38-4831-8661-e44b8bfe71b7",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "sDDv8UMWM7rvcGNH",
+          "name": "leandrocardoso n8n"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "cityName": "={{ $json.queue }}",
+        "language": "pt_BR"
+      },
+      "type": "n8n-nodes-base.openWeatherMap",
+      "typeVersion": 1,
+      "position": [
+        448,
+        -32
+      ],
+      "id": "6929f813-e21e-45d6-90cc-0c06dd408fab",
+      "name": "OpenWeatherMap",
+      "credentials": {
+        "openWeatherMapApi": {
+          "id": "OilzjaolH8mH2fi1",
+          "name": "OpenWeatherMap leandrocardoso"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.0-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.0-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json.toJsonString() }}"
+            }
+          ]
+        },
+        "options": {
+          "systemMessage": "=Sua função é converter dados em mensagem com reescrita natural, tom amigável como em uma conversa humana no whatsapp, respondendo no idioma pt_BR e garantindo desambiguação. Você receberá informações de clima e tempo em uma cidade específica e deverá formatar a mensagem que será enviada ao usuário final. **O usuário acabou de perguntar sobre o tempo na cidade, portanto seja objetivo. Use obrigatoriamente a saída em XXºC**",
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        1024,
+        -224
+      ],
+      "id": "3f10204c-259a-4ebe-a91a-b8255863f1e6",
+      "name": "parseMessage",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "sDDv8UMWM7rvcGNH",
+          "name": "leandrocardoso n8n"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=Agora em {{ $('Edit Fields1').item.json.cityName }} está {{ $('Edit Fields1').item.json.weather }} e a temperatura é {{ $('Edit Fields1').item.json.temperature }}°C.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1376,
+        -128
+      ],
+      "id": "ecb44152-9fed-40e4-b532-76a13c21944f",
+      "name": "Send a text message2",
+      "webhookId": "d2eb96b8-2630-4fef-bcd7-6ebe0ad7fde8",
+      "credentials": {
+        "telegramApi": {
+          "id": "l45b4OI57xq9YdPz",
+          "name": "OroroMunroe - FTR"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=❌ Opa, cidade não encontrada! Use o formato Cidade, país (ex.: São Paulo, BR).",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1088,
+        160
+      ],
+      "id": "dbe73fc1-560f-4b96-bffc-6a0304d2ba62",
+      "name": "Send a text message3",
+      "webhookId": "d2eb96b8-2630-4fef-bcd7-6ebe0ad7fde8",
+      "credentials": {
+        "telegramApi": {
+          "id": "l45b4OI57xq9YdPz",
+          "name": "OroroMunroe - FTR"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "OpenWeatherMap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "parseMessage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenWeatherMap": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parseMessage": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b55d578c-d921-40fa-8391-839824b30b9a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "98a7f76cbff973591af08e09b5be2fed14b55b37d878782c0638229a94477203"
+  },
+  "id": "wVpxgIUkwe7kEIgq",
+  "tags": []
+}
