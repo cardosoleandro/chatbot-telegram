@@ -1,4 +1,4 @@
-# Bot de Clima no Telegram com n8n
+# ⚡️ Bot de Clima no Telegram com n8n
 
 ## 📌 Visão Geral do Projeto
 
