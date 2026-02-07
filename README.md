@@ -148,3 +148,129 @@ O bot de clima desenvolvido está funcional, testável e documentado de forma cl
 - Normalização e validação de dados de entrada
 - Tratamento de erros
 - Comunicação clara com o usuário final
+
+🚀 Como importar, configurar e executar o Bot de Clima
+
+Este projeto utiliza o n8n (versão 1.106.3) para criar um bot de clima no Telegram, integrando a API OpenWeatherMap e, opcionalmente, Google Gemini para respostas mais naturais.
+
+⸻
+
+# 📦 Importando o workflow no n8n
+	1.	Acesse o painel do seu n8n
+	2.	No menu lateral, clique em Workflows
+	3.	Clique em Import
+	4.	Selecione Import from File
+	5.	Faça upload do arquivo JSON do workflow disponível neste repositório
+	6.	Após a importação, o workflow aparecerá na lista de workflows
+
+
+## 🔐 Configuração das credenciais
+
+O workflow pode funcionar com credenciais obrigatórias e credenciais opcionais.
+
+Credenciais obrigatórias
+- Telegram Bot API
+- OpenWeatherMap API
+
+Credencial opcional
+- Google Gemini (Google API)
+
+**Todas as credenciais devem ser criadas usando o sistema padrão de credenciais do n8n.**
+
+
+
+### 🤖 Telegram Bot API (obrigatória)
+
+Criando o bot no Telegram
+1. No Telegram, abra uma conversa com @BotFather
+2. Envie:
+	```
+	/start
+	```
+3. Em seguida:
+	```
+	/newbot
+	```
+4. Defina um nome e um username para o bot
+5. Ao final, o BotFather fornecerá o token do bot
+
+Esse token corresponde à variável:
+**TELEGRAM_BOT_TOKEN**
+
+
+**Criando a credencial no n8n**
+1. No n8n, vá em Credentials
+2. Clique em Add Credential
+3. Selecione Telegram API
+4. No campo Access Token, cole o token gerado pelo BotFather
+5. Salve a credencial
+
+
+### 🌦️ OpenWeatherMap API (obrigatória)
+
+Gerando a API Key
+1. Acesse: https://openweathermap.org/
+2. Crie uma conta (caso ainda não tenha)
+3. Clique sobre o seu usuário e vá até a seção API Keys
+4. Gere uma nova chave
+
+Essa chave corresponde à variável:
+**OPENWEATHER_API_KEY**
+
+
+**Criando a credencial no n8n**
+1. No n8n, vá em Credentials
+2. Clique em Add Credential
+3. Selecione OpenWeatherMap API
+4. No campo API Key, cole a chave gerada
+5. Salve a credencial
+
+
+### 🤖 Google Gemini API (opcional)
+
+**⚠️ Esta credencial é opcional.**
+O workflow funciona normalmente sem o Gemini, retornando mensagens padrão.
+Quando configurado, o Gemini é utilizado apenas para melhorar a naturalidade das respostas e mensagens de erro.
+
+Gerando a API Key
+1. Acesse: https://ai.google.dev/
+2. Crie um projeto (caso necessário)
+3. Gere uma chave de API para o Gemini
+
+Essa chave corresponde à variável:
+**GEMINI_API_KEY**
+
+
+**Criando a credencial no n8n**
+1. No n8n, vá em Credentials
+2. Clique em Add Credential
+3. Selecione Google Palm API
+4. Cole a chave de API do Gemini
+5. Salve a credencial
+
+**📌 Caso essa credencial não seja criada, o fluxo continua funcionando, pois os nodes de IA possuem tratamento de erro configurado.**
+
+
+## 🔗 Associando as credenciais ao workflow
+	1.	Abra o workflow importado
+	2.	Abra todos os nodes dos tipos:
+		•	Telegram Trigger
+		•	Telegram Send a text message
+		•	OpenWeatherMap
+		•	Nodes Gemini (opcional)
+	3.	Selecione as credenciais correspondentes criadas anteriormente
+	4.	Salve o workflow
+
+
+## ▶️ Ativando o workflow
+	1.	Com o workflow aberto, clique em Activate
+	2.	O webhook do Telegram será registrado automaticamente
+	3.	O bot estará pronto para receber mensagens
+
+
+## 🧪 Como testar o chatbot
+
+Acessando o bot no Telegram
+
+👉 Envie uma mensagem ao bot que você acabou de criar.
+Alternativa: O bot criado para construção desse fluxo continua ativo e pode ser testado em https://t.me/OroroMunroe_bot, basta enviar uma mensagem para ele.
